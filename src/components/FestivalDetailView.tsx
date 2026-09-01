@@ -110,7 +110,7 @@ export const FestivalDetailView: React.FC<FestivalDetailViewProps> = ({
         </div>
 
         {/* Content Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 md:p-10 text-white space-y-4 max-w-4xl">
+        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 md:p-10 text-white space-y-4 w-full">
           <div className="flex flex-wrap items-center gap-2">
             <span className="bg-orange-500/90 text-white text-[10px] uppercase font-bold tracking-widest italic px-3.5 py-1 rounded-full flex items-center gap-1.5 shadow-xs">
               <Calendar className="w-3.5 h-3.5 text-white" />
@@ -149,7 +149,7 @@ export const FestivalDetailView: React.FC<FestivalDetailViewProps> = ({
             </div>
           )}
 
-          <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed max-w-3xl font-normal">
+          <p className="text-xs sm:text-sm md:text-base text-white/90 leading-relaxed max-w-4xl font-normal">
             {festival.shortDescription}
           </p>
 

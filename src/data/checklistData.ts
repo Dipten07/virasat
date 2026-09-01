@@ -167,40 +167,28 @@ export const CITY_SPECIFIC_CHECKLIST_ITEMS: Record<string, TripChecklistItem[]> 
 
 const CHECKLIST_STORAGE_KEY = 'virasat_trip_checklist_v1';
 
-export function loadSavedChecklist(cityId?: string): TripChecklistItem[] {
-  try {
-    const raw = localStorage.getItem(CHECKLIST_STORAGE_KEY);
-    const customItems: TripChecklistItem[] = raw ? JSON.parse(raw) : [];
+export function getDefaultChecklist(cityId?: string): TripChecklistItem[] {
+  const baseCopy = BASE_HERITAGE_CHECKLIST.map((item) => ({ ...item, completed: false }));
+  let result = [...baseCopy];
 
-    // Combine base items + city specific items + user custom items
-    const baseCopy = BASE_HERITAGE_CHECKLIST.map((item) => {
-      const found = customItems.find((ci) => ci.id === item.id);
-      return found ? { ...item, completed: found.completed } : { ...item };
-    });
-
-    let result = [...baseCopy];
-
-    if (cityId && CITY_SPECIFIC_CHECKLIST_ITEMS[cityId]) {
-      const cityItems = CITY_SPECIFIC_CHECKLIST_ITEMS[cityId].map((item) => {
-        const found = customItems.find((ci) => ci.id === item.id);
-        return found ? { ...item, completed: found.completed } : { ...item };
-      });
-      result = [...cityItems, ...result];
-    }
-
-    // Add any user-added custom items
-    const userCreated = customItems.filter((ci) => ci.id.startsWith('user-custom-'));
-    return [...result, ...userCreated];
-  } catch (e) {
-    console.error('Error loading saved checklist:', e);
-    return [...BASE_HERITAGE_CHECKLIST];
+  if (cityId && CITY_SPECIFIC_CHECKLIST_ITEMS[cityId]) {
+    const cityItems = CITY_SPECIFIC_CHECKLIST_ITEMS[cityId].map((item) => ({ ...item, completed: false }));
+    result = [...cityItems, ...result];
   }
+
+  return result;
 }
 
-export function saveChecklistState(items: TripChecklistItem[]) {
+export function loadSavedChecklist(cityId?: string): TripChecklistItem[] {
+  // Clear any previously persisted checklist to prevent restoring past states across refresh
   try {
-    localStorage.setItem(CHECKLIST_STORAGE_KEY, JSON.stringify(items));
+    localStorage.removeItem(CHECKLIST_STORAGE_KEY);
   } catch (e) {
-    console.error('Error saving checklist state:', e);
+    // Ignore localStorage errors in restricted environments
   }
+  return getDefaultChecklist(cityId);
+}
+
+export function saveChecklistState(_items: TripChecklistItem[]) {
+  // Intentionally not persisted to localStorage so checklist starts fresh on page refresh
 }

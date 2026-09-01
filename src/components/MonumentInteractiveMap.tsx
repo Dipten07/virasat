@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { Monument, UserLocation } from '../types';
+import { Monument, UserLocation, SupportedLanguage } from '../types';
 import { MONUMENTS_DATA } from '../data/monumentsData';
 import { CITIES_DATA } from '../data/citiesData';
 import { getCityWeather } from '../data/weatherService';
+import { getTranslation } from '../data/languages';
 import {
   Search,
   Navigation,
@@ -32,6 +33,7 @@ interface MonumentInteractiveMapProps {
   onOpenItineraryGenerator?: (cityId: string) => void;
   heightClassName?: string;
   compact?: boolean;
+  currentLanguage?: SupportedLanguage;
 }
 
 // Map Tile Layer Providers

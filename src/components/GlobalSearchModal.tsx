@@ -239,7 +239,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                             <p className="text-xs text-[#8a817c] flex items-center gap-2 mt-0.5 font-normal">
                               <span>📅 {f.dateRange}</span>
                               <span>•</span>
-                              <span className="capitalize">{f.celebratedStates.slice(0, 2).join(', ')}</span>
+                              <span className="capitalize">{(f.celebratedStates || []).slice(0, 2).join(', ')}</span>
                             </p>
                           </div>
                         </div>

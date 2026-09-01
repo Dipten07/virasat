@@ -247,24 +247,44 @@ export const CultureQuizView: React.FC<CultureQuizViewProps> = ({
   return (
     <div className="space-y-8 animate-fadeIn pb-16">
       {/* Top Header Banner */}
-      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#2d2a26] via-[#3d3832] to-[#2d2a26] text-white p-6 sm:p-10 border border-[#4a443c] shadow-xl">
-        <div className="relative z-10 max-w-3xl space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="bg-[#E6BE8A] text-[#2d2a26] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5" /> Indian Heritage Trivia
-            </span>
-            <span className="text-[#E6BE8A] text-xs font-serif font-medium">
-              Architecture &bull; Sacred Festivals &bull; Classical Arts &bull; GI Crafts &bull; Royal Dynasties
-            </span>
+      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#2d2a26] via-[#3d3832] to-[#2d2a26] text-white p-6 sm:p-8 md:p-10 border border-[#4a443c] shadow-xl">
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          <div className="md:col-span-8 space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="bg-[#E6BE8A] text-[#2d2a26] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-1.5">
+                <Award className="w-3.5 h-3.5" /> Indian Heritage Trivia
+              </span>
+              <span className="text-[#E6BE8A] text-xs font-serif font-medium">
+                Architecture &bull; Sacred Festivals &bull; Classical Arts &bull; GI Crafts &bull; Royal Dynasties
+              </span>
+            </div>
+
+            <h2 className="text-2xl sm:text-4xl font-serif font-bold text-white tracking-tight">
+              Bharatiya Sanskriti & Heritage Quiz
+            </h2>
+
+            <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed font-normal">
+              Test your cultural wisdom on ancient rock-cut marvels, celestial festival calendars, Natyashastra dance mudras, handloom traditions, and temple culinary legacies.
+            </p>
           </div>
 
-          <h2 className="text-2xl sm:text-4xl font-serif font-bold text-white tracking-tight">
-            Bharatiya Sanskriti & Heritage Quiz
-          </h2>
-
-          <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed font-normal">
-            Test your cultural wisdom on ancient rock-cut marvels, celestial festival calendars, Natyashastra dance mudras, handloom traditions, and temple culinary legacies.
-          </p>
+          <div className="md:col-span-4 flex flex-col gap-2.5 bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xs">
+            <div className="text-xs font-bold uppercase tracking-widest text-[#E6BE8A] flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Interactive Features</span>
+            </div>
+            <div className="space-y-1.5 text-xs text-neutral-300">
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-400">✓</span> 80+ Cultural & Monument Questions
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-400">✓</span> Audio Pronunciation & Read-Aloud
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-400">✓</span> Shareable Achievement Badges
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

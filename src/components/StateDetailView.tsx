@@ -1,8 +1,10 @@
-import React from 'react';
-import { StateData } from '../types';
+import React, { useState } from 'react';
+import { StateData, SupportedLanguage } from '../types';
 import { CITIES_DATA } from '../data/citiesData';
 import { FESTIVALS_DATA } from '../data/festivalsData';
 import { MONUMENTS_DATA } from '../data/monumentsData';
+import { getTranslation, SUPPORTED_LANGUAGES } from '../data/languages';
+import { speakText, stopSpeech, getSpeechCodeForLang } from '../services/speechService';
 import {
   MapPin,
   Landmark,
@@ -11,11 +13,15 @@ import {
   ArrowRight,
   Compass,
   Building2,
-  Utensils
+  Utensils,
+  Headphones,
+  Pause,
+  Volume2
 } from 'lucide-react';
 
 interface StateDetailViewProps {
   state: StateData;
+  currentLanguage?: SupportedLanguage;
   onSelectCity: (cityId: string) => void;
   onSelectFestival: (festivalId: string) => void;
   onSelectMonument: (monumentId: string) => void;
@@ -24,11 +30,15 @@ interface StateDetailViewProps {
 
 export const StateDetailView: React.FC<StateDetailViewProps> = ({
   state,
+  currentLanguage = 'en',
   onSelectCity,
   onSelectFestival,
   onSelectMonument,
   onBackToStates
 }) => {
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [speechSpeed, setSpeechSpeed] = useState<number>(0.9);
+
   // Cities belonging to this state
   const stateCities = CITIES_DATA.filter(
     (c) =>
@@ -50,6 +60,29 @@ export const StateDetailView: React.FC<StateDetailViewProps> = ({
       m.state.toLowerCase() === state.name.toLowerCase() ||
       stateCities.some((c) => c.id === m.cityId)
   );
+
+  const activeLangMeta = SUPPORTED_LANGUAGES.find((l) => l.code === currentLanguage);
+
+  const handleToggleAudio = async () => {
+    if (isPlayingAudio) {
+      stopSpeech();
+      setIsPlayingAudio(false);
+      return;
+    }
+
+    setIsPlayingAudio(true);
+    const narrationScript = `${state.name} in ${state.region} India. Capital: ${state.capital}. ${state.culturalSummary}. Famous for ${state.famousFor.join(', ')}.`;
+    const speechCode = getSpeechCodeForLang(currentLanguage);
+
+    await speakText({
+      text: narrationScript,
+      phoneticText: narrationScript,
+      langCode: speechCode,
+      rate: speechSpeed,
+      onEnd: () => setIsPlayingAudio(false),
+      onError: () => setIsPlayingAudio(false)
+    });
+  };
 
   return (
     <div className="space-y-10 animate-fadeIn pb-16">
@@ -88,21 +121,81 @@ export const StateDetailView: React.FC<StateDetailViewProps> = ({
             </p>
           </div>
 
-          <div className="pt-2 flex flex-wrap items-center gap-2">
-            <span className="text-[10px] uppercase font-bold tracking-wider text-[#E6BE8A]">
-              Famous For:
-            </span>
-            {state.famousFor.map((item, idx) => (
-              <span
-                key={idx}
-                className="text-xs bg-black/40 text-white backdrop-blur-md px-3 py-1 rounded-full border border-white/15"
-              >
-                {item}
+          <div className="pt-2 flex flex-wrap items-center gap-3">
+            <button
+              onClick={handleToggleAudio}
+              className={`flex items-center gap-2 px-6 py-3 text-xs font-bold uppercase tracking-widest rounded-full shadow-md backdrop-blur-md border transition-all cursor-pointer ${
+                isPlayingAudio
+                  ? 'bg-[#8A3324] text-white border-[#8A3324] animate-pulse'
+                  : 'bg-white/20 hover:bg-white/30 text-white border-white/30'
+              }`}
+            >
+              {isPlayingAudio ? (
+                <>
+                  <Pause className="w-4 h-4 text-white" />
+                  <span>{getTranslation('btn.stopAudio', currentLanguage)}</span>
+                </>
+              ) : (
+                <>
+                  <Headphones className="w-4 h-4 text-[#E6BE8A]" />
+                  <span>{getTranslation('btn.listenAudio', currentLanguage)} ({activeLangMeta?.nativeName || 'Voice'})</span>
+                </>
+              )}
+            </button>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-[#E6BE8A]">
+                Famous For:
               </span>
-            ))}
+              {state.famousFor.map((item, idx) => (
+                <span
+                  key={idx}
+                  className="text-xs bg-black/40 text-white backdrop-blur-md px-3 py-1 rounded-full border border-white/15"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Audio Narration Bar */}
+      {isPlayingAudio && (
+        <div className="bg-[#8A3324] text-white rounded-2xl p-4 px-6 flex flex-wrap items-center justify-between gap-4 shadow-lg animate-fadeIn">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center animate-bounce">
+              <Volume2 className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <div className="text-xs font-bold uppercase tracking-wider text-[#E6BE8A]">
+                Active Audio Narration ({activeLangMeta?.name || 'Local Dialect'})
+              </div>
+              <div className="text-xs text-white/90 font-serif line-clamp-1">
+                Listening to the cultural heritage of {state.name}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                const nextSpeed = speechSpeed === 0.9 ? 1.1 : speechSpeed === 1.1 ? 0.75 : 0.9;
+                setSpeechSpeed(nextSpeed);
+                handleToggleAudio();
+              }}
+              className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-white border border-white/20 cursor-pointer"
+            >
+              Speed: {speechSpeed}x
+            </button>
+            <button
+              onClick={handleToggleAudio}
+              className="px-4 py-1 bg-white text-[#8A3324] rounded-lg text-xs font-bold cursor-pointer hover:bg-[#E6BE8A] transition-colors"
+            >
+              {getTranslation('btn.stopAudio', currentLanguage)}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 2. HERITAGE CITIES IN THIS STATE */}
       <section className="space-y-5">

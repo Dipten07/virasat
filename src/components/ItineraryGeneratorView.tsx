@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { CityDestination, UserLocation, DayItinerary, ItineraryActivity, SavedItinerary } from '../types';
+import { CityDestination, UserLocation, DayItinerary, ItineraryActivity, SavedItinerary, SupportedLanguage } from '../types';
 import { generatePersonalizedItinerary, calculateTravelPlan } from '../data/travelUtils';
 import { FESTIVALS_DATA } from '../data/festivalsData';
 import { CITIES_DATA } from '../data/citiesData';
+import { getTranslation } from '../data/languages';
 import {
   Calendar,
   Clock,
@@ -35,6 +36,7 @@ interface ItineraryGeneratorViewProps {
   onSelectFestival?: (festivalId?: string) => void;
   onSaveItinerary: (saved: SavedItinerary) => void;
   onBack: () => void;
+  currentLanguage?: SupportedLanguage;
 }
 
 export const ItineraryGeneratorView: React.FC<ItineraryGeneratorViewProps> = ({
@@ -44,7 +46,8 @@ export const ItineraryGeneratorView: React.FC<ItineraryGeneratorViewProps> = ({
   onSelectCity,
   onSelectFestival,
   onSaveItinerary,
-  onBack
+  onBack,
+  currentLanguage = 'en'
 }) => {
   const [daysCount, setDaysCount] = useState<number>(3);
   const [travelPace, setTravelPace] = useState<'Relaxed' | 'Balanced' | 'Fast-Paced'>('Balanced');

@@ -98,7 +98,7 @@ export const MonumentDetailView: React.FC<MonumentDetailViewProps> = ({
         </div>
 
         {/* Content Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 md:p-10 text-white space-y-4 max-w-4xl">
+        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 md:p-10 text-white space-y-4 w-full">
           <div className="flex flex-wrap items-center gap-2">
             <span className="bg-[#E6BE8A] text-[#2d2a26] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-xs">
               {monument.type}
@@ -123,7 +123,7 @@ export const MonumentDetailView: React.FC<MonumentDetailViewProps> = ({
             )}
           </div>
 
-          <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed max-w-3xl font-normal">
+          <p className="text-xs sm:text-sm md:text-base text-white/90 leading-relaxed max-w-4xl font-normal">
             {monument.historicalSignificance}
           </p>
 

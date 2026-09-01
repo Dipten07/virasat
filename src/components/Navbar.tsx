@@ -34,6 +34,7 @@ interface NavbarProps {
   currentLanguage: SupportedLanguage;
   onOpenLanguageModal: () => void;
   onOpenAuthModal: () => void;
+  onOpenTourGuide?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -44,7 +45,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSearchModal,
   currentLanguage,
   onOpenLanguageModal,
-  onOpenAuthModal
+  onOpenAuthModal,
+  onOpenTourGuide
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, userProfile, bookmarks, itineraries } = useAuth();
@@ -120,6 +122,18 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Right Action Tools (Language, Search, Location Pill, Cloud User / Trip) */}
             <div className="flex items-center gap-2 sm:gap-2.5">
+              {/* AI Tour Guide Button */}
+              {onOpenTourGuide && (
+                <button
+                  onClick={onOpenTourGuide}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-[#5A5A40] hover:bg-[#9E3E26] text-white rounded-full transition-all shadow-2xs font-semibold cursor-pointer shrink-0"
+                  title="Ask Margdarshak AI Tour Guide"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#E6BE8A]" />
+                  <span className="hidden sm:inline">AI Guide</span>
+                </button>
+              )}
+
               {/* Language Selector Pill */}
               <button
                 onClick={onOpenLanguageModal}

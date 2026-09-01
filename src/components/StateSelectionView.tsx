@@ -1,21 +1,32 @@
 import React, { useState } from 'react';
-import { StateData } from '../types';
+import { StateData, SupportedLanguage } from '../types';
 import { STATES_DATA } from '../data/statesData';
 import { CITIES_DATA } from '../data/citiesData';
+import { getTranslation } from '../data/languages';
 import { Map, MapPin, ArrowRight, Sparkles, Compass } from 'lucide-react';
 
 interface StateSelectionViewProps {
   onSelectState: (stateId: string) => void;
   onSelectCity: (cityId: string) => void;
+  currentLanguage?: SupportedLanguage;
 }
 
 export const StateSelectionView: React.FC<StateSelectionViewProps> = ({
   onSelectState,
-  onSelectCity
+  onSelectCity,
+  currentLanguage = 'en'
 }) => {
   const [selectedRegion, setSelectedRegion] = useState<string>('All');
 
-  const regions = ['All', 'North', 'South', 'West', 'East', 'Central', 'North-East'];
+  const regionKeys: { id: string; key: string; fallback: string }[] = [
+    { id: 'All', key: 'state.regionAll', fallback: 'All Regions' },
+    { id: 'North', key: 'state.regionNorth', fallback: 'North India' },
+    { id: 'South', key: 'state.regionSouth', fallback: 'South India' },
+    { id: 'West', key: 'state.regionWest', fallback: 'West India' },
+    { id: 'East', key: 'state.regionEast', fallback: 'East India' },
+    { id: 'Central', key: 'state.regionCentral', fallback: 'Central India' },
+    { id: 'North-East', key: 'state.regionNortheast', fallback: 'North-East India' }
+  ];
 
   const filteredStates =
     selectedRegion === 'All'
@@ -37,31 +48,36 @@ export const StateSelectionView: React.FC<StateSelectionViewProps> = ({
         <div>
           <div className="flex items-center gap-1.5 text-xs font-bold text-[#8a817c] uppercase tracking-widest">
             <Map className="w-3.5 h-3.5 text-[#5A5A40]" />
-            <span>State Cultural Geographies</span>
+            <span>{getTranslation('nav.states', currentLanguage) || 'State Cultural Geographies'}</span>
           </div>
           <h1 className="text-2xl sm:text-4xl font-serif font-bold text-[#2d2a26] mt-0.5">
-            Explore India by States & UTs
+            {getTranslation('state.directoryTitle', currentLanguage) || 'Explore India by States & UTs'}
           </h1>
           <p className="text-xs sm:text-sm text-[#8a817c] mt-1 font-normal">
-            Discover local traditions, classical arts, cuisines and historic cities across India.
+            {getTranslation('state.directorySubtitle', currentLanguage) ||
+              'Discover local traditions, classical arts, cuisines and historic cities across India.'}
           </p>
         </div>
 
         {/* Region Filter Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-          {regions.map((reg) => (
-            <button
-              key={reg}
-              onClick={() => setSelectedRegion(reg)}
-              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full transition-all cursor-pointer whitespace-nowrap ${
-                selectedRegion === reg
-                  ? 'bg-[#5A5A40] text-white shadow-xs'
-                  : 'bg-white hover:bg-[#f5f2ed] text-[#8a817c] border border-[#e5e0d8]'
-              }`}
-            >
-              {reg} {reg !== 'All' ? 'India' : ''}
-            </button>
-          ))}
+          {regionKeys.map((reg) => {
+            const isSelected = selectedRegion === reg.id;
+            const label = getTranslation(reg.key, currentLanguage) || reg.fallback;
+            return (
+              <button
+                key={reg.id}
+                onClick={() => setSelectedRegion(reg.id)}
+                className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full transition-all cursor-pointer whitespace-nowrap ${
+                  isSelected
+                    ? 'bg-[#5A5A40] text-white shadow-xs'
+                    : 'bg-white hover:bg-[#f5f2ed] text-[#8a817c] border border-[#e5e0d8]'
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -101,7 +117,7 @@ export const StateSelectionView: React.FC<StateSelectionViewProps> = ({
                 {/* Famous For Chips */}
                 <div>
                   <span className="text-[10px] font-bold text-[#5A5A40] uppercase tracking-widest block mb-1.5">
-                    Famous For:
+                    {getTranslation('state.famousFor', currentLanguage) || 'Famous For'}:
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {state.famousFor.map((item, idx) => (
@@ -118,7 +134,7 @@ export const StateSelectionView: React.FC<StateSelectionViewProps> = ({
                 {/* Cities in State */}
                 <div>
                   <span className="text-[10px] font-bold text-[#8a817c] uppercase tracking-widest block mb-1.5">
-                    Featured Destinations:
+                    {getTranslation('nav.destinations', currentLanguage) || 'Featured Destinations'}:
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {state.cities.map((cityId) => (
@@ -140,7 +156,7 @@ export const StateSelectionView: React.FC<StateSelectionViewProps> = ({
                 onClick={() => onSelectState(state.id)}
                 className="w-full py-2.5 px-4 text-xs font-bold uppercase tracking-wider text-white bg-[#5A5A40] hover:bg-[#464632] rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
               >
-                <span>Explore {state.name} Heritage</span>
+                <span>{getTranslation('state.exploreState', currentLanguage) || 'Explore State Culture'}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>

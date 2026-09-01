@@ -8,7 +8,7 @@ export const ODISHA_FESTIVALS_DATA: Festival[] = [
     monthId: 7,
     monthName: 'July',
     dateRange: 'Ashadha Shukla Dwitiya (June / July)',
-    duration: '9 Days',
+    duration: '11 Days',
     bannerImage: 'https://images.unsplash.com/photo-1579273166152-d725a4e2b755?auto=format&fit=crop&w=1600&q=80',
     gallery: [
       'https://images.unsplash.com/photo-1579273166152-d725a4e2b755?auto=format&fit=crop&w=800&q=80'

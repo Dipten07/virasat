@@ -1,8 +1,9 @@
 import React from 'react';
-import { SavedItinerary, UserLocation } from '../types';
+import { SavedItinerary, UserLocation, SupportedLanguage } from '../types';
 import { FESTIVALS_DATA } from '../data/festivalsData';
 import { MONUMENTS_DATA } from '../data/monumentsData';
 import { CITIES_DATA } from '../data/citiesData';
+import { getTranslation } from '../data/languages';
 import { useAuth } from '../context/AuthContext';
 import {
   Luggage,
@@ -35,6 +36,7 @@ interface MyTripViewProps {
   onToggleSaveMonument: (id: string) => void;
   onOpenItineraryGenerator: (cityId: string, festivalId?: string) => void;
   onOpenAuthModal?: () => void;
+  currentLanguage?: SupportedLanguage;
 }
 
 export const MyTripView: React.FC<MyTripViewProps> = ({
@@ -46,7 +48,8 @@ export const MyTripView: React.FC<MyTripViewProps> = ({
   onToggleSaveFestival,
   onToggleSaveMonument,
   onOpenItineraryGenerator,
-  onOpenAuthModal
+  onOpenAuthModal,
+  currentLanguage = 'en'
 }) => {
   const { user, bookmarks, itineraries, toggleBookmark, removeItinerary } = useAuth();
 

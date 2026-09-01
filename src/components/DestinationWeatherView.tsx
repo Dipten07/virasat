@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { UserLocation } from '../types';
+import { UserLocation, SupportedLanguage } from '../types';
 import { CITIES_DATA } from '../data/citiesData';
 import { DESTINATION_WEATHER_DATA, getCityWeather } from '../data/weatherService';
+import { getTranslation } from '../data/languages';
 import {
   CloudSun,
   Sun,
@@ -22,10 +23,12 @@ import {
 
 interface DestinationWeatherViewProps {
   initialCityId?: string;
-  userLocation: UserLocation;
-  onSelectCity: (cityId: string) => void;
-  onSelectMonument: (monumentId: string) => void;
-  onOpenItineraryGenerator: (cityId: string) => void;
+  userLocation?: UserLocation;
+  onSelectCity?: (cityId: string) => void;
+  onSelectMonument?: (monumentId: string) => void;
+  onOpenItineraryGenerator?: (cityId: string) => void;
+  onExploreMap?: () => void;
+  currentLanguage?: SupportedLanguage;
 }
 
 export const DestinationWeatherView: React.FC<DestinationWeatherViewProps> = ({
@@ -33,7 +36,9 @@ export const DestinationWeatherView: React.FC<DestinationWeatherViewProps> = ({
   userLocation,
   onSelectCity,
   onSelectMonument,
-  onOpenItineraryGenerator
+  onOpenItineraryGenerator,
+  onExploreMap,
+  currentLanguage = 'en'
 }) => {
   const [selectedCityId, setSelectedCityId] = useState<string>(initialCityId);
 
@@ -57,7 +62,7 @@ export const DestinationWeatherView: React.FC<DestinationWeatherViewProps> = ({
     <div className="space-y-10 animate-fadeIn pb-16">
       {/* Header Banner */}
       <div className="bg-linear-to-r from-[#3a352f] to-[#2d2a26] rounded-3xl p-6 sm:p-10 text-white shadow-md border border-[#e5e0d8] relative overflow-hidden">
-        <div className="relative z-10 max-w-3xl space-y-4">
+        <div className="relative z-10 w-full space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-widest text-[#E6BE8A]">
             <CloudSun className="w-3.5 h-3.5 text-[#E6BE8A]" />
             <span>Heritage Climate & Travel Intelligence</span>
@@ -67,7 +72,7 @@ export const DestinationWeatherView: React.FC<DestinationWeatherViewProps> = ({
             Destination Weather & Optimal Travel Timings
           </h1>
 
-          <p className="text-sm sm:text-base text-white/80 leading-relaxed font-normal">
+          <p className="text-sm sm:text-base text-white/80 leading-relaxed font-normal max-w-4xl">
             Real-time meteorological insights, air comfort ratings, and tailored outdoor visiting hours for India’s iconic monuments, river ghats, and hill fortresses.
           </p>
 

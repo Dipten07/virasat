@@ -1,19 +1,22 @@
 import React from 'react';
-import { Festival } from '../types';
-import { Calendar, MapPin, ArrowRight, Heart, Sparkles, Compass } from 'lucide-react';
+import { Festival, SupportedLanguage } from '../types';
+import { getTranslation } from '../data/languages';
+import { Calendar, MapPin, ArrowRight, Heart, Sparkles } from 'lucide-react';
 
 interface FestivalCardProps {
   festival: Festival;
   onExplore: (festivalId: string) => void;
   isSaved?: boolean;
   onToggleSave?: (festivalId: string) => void;
+  currentLanguage?: SupportedLanguage;
 }
 
 export const FestivalCard: React.FC<FestivalCardProps> = ({
   festival,
   onExplore,
   isSaved = false,
-  onToggleSave
+  onToggleSave,
+  currentLanguage = 'en'
 }) => {
   return (
     <div className="group flex flex-col bg-white rounded-3xl border border-[#e5e0d8] p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
@@ -59,74 +62,46 @@ export const FestivalCard: React.FC<FestivalCardProps> = ({
             <Sparkles className="w-3 h-3" />
             <span>{festival.duration} • {festival.monthName}</span>
           </div>
-          <h3 className="text-lg sm:text-xl font-serif font-bold text-white leading-tight line-clamp-1">
+          <h3 className="text-xl font-serif font-bold text-white line-clamp-1 leading-snug">
             {festival.name}
           </h3>
         </div>
       </div>
 
-      {/* Card Body */}
-      <div className="pt-4 px-1 flex-1 flex flex-col justify-between space-y-3.5">
+      {/* Content Section */}
+      <div className="flex-1 flex flex-col justify-between pt-3.5 px-1 space-y-3">
         <div className="space-y-2">
-          <p className="text-xs text-[#8a817c] line-clamp-2 leading-relaxed">
-            {festival.shortDescription}
-          </p>
-
-          {/* Celebrated States & Destinations */}
-          <div className="flex flex-wrap items-center gap-1.5 text-xs text-[#8a817c]">
-            <span className="text-[10px] uppercase font-bold tracking-wider text-[#5A5A40] flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
-              {festival.stateOrigin ? `${festival.stateOrigin}:` : 'States:'}
-            </span>
-            <span className="capitalize text-[#2d2a26] font-medium text-xs">
-              {festival.traditionalTithi ? festival.traditionalTithi : festival.celebratedStates.slice(0, 3).join(', ')}
-              {!festival.traditionalTithi && festival.celebratedStates.length > 3 ? ` +${festival.celebratedStates.length - 3} more` : ''}
-            </span>
+          <div className="flex items-center gap-1 text-xs text-[#8a817c]">
+            <MapPin className="w-3.5 h-3.5 text-[#5A5A40] shrink-0" />
+            <span className="font-semibold text-[#5A5A40] truncate">{festival.stateOrigin || festival.celebratedStates?.[0] || 'India'}</span>
+            <span>&bull;</span>
+            <span className="truncate">{(festival.primaryDestinations || festival.celebratedStates || []).join(', ')}</span>
           </div>
 
-          {/* Special Foods or Tags */}
-          {festival.specialFoods && festival.specialFoods.length > 0 ? (
-            <div className="flex flex-wrap gap-1 pt-1">
-              <span className="text-[9px] uppercase font-bold tracking-wider bg-amber-50 text-amber-900 px-2 py-0.5 rounded-full border border-amber-200">
-                🍽️ {festival.specialFoods.slice(0, 2).join(', ')}
+          <p className="text-xs text-[#6b625b] line-clamp-2 leading-relaxed font-normal">
+            {festival.shortDescription || festival.culturalSignificance}
+          </p>
+
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {(festival.keyActivities || festival.ritualHighlights || festival.tags || []).slice(0, 2).map((highlight, idx) => (
+              <span
+                key={idx}
+                className="bg-[#f5f2ed] border border-[#e5e0d8] text-[#5A5A40] text-[10px] font-semibold px-2.5 py-0.5 rounded-full line-clamp-1"
+              >
+                {highlight}
               </span>
-              {festival.tags.slice(0, 2).map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="text-[9px] uppercase font-bold tracking-wider bg-[#f5f2ed] text-[#5A5A40] px-2 py-0.5 rounded-full border border-[#e5e0d8]"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {festival.tags.slice(0, 3).map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="text-[10px] uppercase font-bold tracking-wider bg-[#f5f2ed] text-[#5A5A40] px-2.5 py-0.5 rounded-full border border-[#e5e0d8]"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
+            ))}
+          </div>
         </div>
 
-        {/* Card Footer Button */}
-        <div className="pt-3 border-t border-[#e5e0d8] flex items-center justify-between">
-          <span className="text-[10px] uppercase font-bold tracking-wider text-[#8a817c]">
-            {festival.primaryDestinations.length} Hub{festival.primaryDestinations.length > 1 ? 's' : ''}
-          </span>
-
-          <button
-            onClick={() => onExplore(festival.id)}
-            className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold uppercase tracking-widest text-white bg-[#5A5A40] hover:bg-[#484833] rounded-full transition-all shadow-md shadow-[#5A5A40]/15 active:scale-95 cursor-pointer group/btn"
-          >
-            <span>Explore</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
-          </button>
-        </div>
+        {/* Explore Button */}
+        <button
+          onClick={() => onExplore(festival.id)}
+          className="w-full mt-2 py-2.5 px-4 bg-[#f5f2ed] hover:bg-[#5A5A40] text-[#5A5A40] hover:text-white rounded-xl text-xs uppercase font-bold tracking-wider transition-colors flex items-center justify-center gap-2 group/btn cursor-pointer"
+        >
+          <span>{getTranslation('btn.explore', currentLanguage) || 'Explore Festival'}</span>
+          <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
+        </button>
       </div>
     </div>
   );

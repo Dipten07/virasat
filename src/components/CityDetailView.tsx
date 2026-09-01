@@ -86,7 +86,9 @@ export const CityDetailView: React.FC<CityDetailViewProps> = ({
     }
 
     setIsPlayingAudio(true);
-    const narrationScript = `${city.name}, ${city.state}. ${city.tagline}. ${city.overview}. Famous for sacred heritage, delicious cuisine like ${city.famousFood.slice(0, 3).join(', ')}, and lively bazaars like ${city.famousBazaars.slice(0, 2).join(', ')}.`;
+    const foodNames = (city.authenticFood || []).slice(0, 3).map(f => f.name).join(', ');
+    const streetNames = (city.heritageStreets || []).slice(0, 2).map(s => s.name).join(', ');
+    const narrationScript = `${city.name}, ${city.state}. ${city.tagline || ''}. ${city.overview || ''}. ${foodNames ? 'Famous for cuisine like ' + foodNames + '.' : ''} ${streetNames ? 'And lively bazaars like ' + streetNames + '.' : ''}`;
     const speechCode = getSpeechCodeForLang(currentLanguage);
 
     await speakText({
@@ -114,7 +116,7 @@ export const CityDetailView: React.FC<CityDetailViewProps> = ({
         </div>
 
         {/* Content Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 md:p-10 text-white space-y-4 max-w-4xl">
+        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 md:p-10 text-white space-y-4 w-full">
           <div className="flex flex-wrap items-center gap-2">
             <span className="bg-orange-500/90 text-white text-[10px] uppercase font-bold tracking-widest italic px-3.5 py-1 rounded-full flex items-center gap-1.5 shadow-xs">
               <MapPin className="w-3.5 h-3.5 text-white" />
@@ -137,7 +139,7 @@ export const CityDetailView: React.FC<CityDetailViewProps> = ({
             </p>
           </div>
 
-          <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed max-w-3xl font-normal">
+          <p className="text-xs sm:text-sm md:text-base text-white/90 leading-relaxed max-w-4xl font-normal">
             {city.overview}
           </p>
 
@@ -237,6 +239,7 @@ export const CityDetailView: React.FC<CityDetailViewProps> = ({
             cityId={city.id}
             cityName={city.name}
             stateName={city.state}
+            currentLanguage={currentLanguage}
           />
         </section>
       )}
@@ -665,7 +668,7 @@ export const CityDetailView: React.FC<CityDetailViewProps> = ({
 
                 <div className="pt-2 border-t border-[#e5e0d8] text-[11px] text-[#8a817c]">
                   <strong className="text-[#5A5A40]">Best Places: </strong>
-                  <span>{food.iconicSpots.join(', ')}</span>
+                  <span>{(food.iconicSpots || []).join(', ')}</span>
                 </div>
               </div>
             ))}

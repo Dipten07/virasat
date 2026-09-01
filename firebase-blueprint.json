@@ -1,0 +1,134 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account profile and travel preferences",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 128 },
+        "photoURL": { "type": "string", "maxLength": 512 },
+        "isAnonymous": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "homeCity": { "type": "string", "maxLength": 128 },
+        "favoriteRegion": { "type": "string", "maxLength": 128 },
+        "bio": { "type": "string", "maxLength": 500 },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "displayName"]
+    },
+    "UserBookmark": {
+      "title": "UserBookmark",
+      "description": "Saved monument, festival, city or state",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "itemType": { "type": "string", "enum": ["festival", "monument", "city", "state"] },
+        "itemId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "subtitle": { "type": "string", "maxLength": 200 },
+        "image": { "type": "string", "maxLength": 1024 },
+        "state": { "type": "string", "maxLength": 100 },
+        "dateRange": { "type": "string", "maxLength": 100 },
+        "savedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "itemType", "itemId", "title", "savedAt"]
+    },
+    "SavedItinerary": {
+      "title": "SavedItinerary",
+      "description": "Customized day-by-day heritage itinerary",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "city": { "type": "string", "maxLength": 128 },
+        "days": { "type": "number" },
+        "month": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "dailyPlans": { "type": "array" },
+        "notes": { "type": "string", "maxLength": 2000 }
+      },
+      "required": ["id", "title", "city", "days", "createdAt"]
+    },
+    "VisitedPlace": {
+      "title": "VisitedPlace",
+      "description": "Heritage passport stamp or visited check-in",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "itemType": { "type": "string", "enum": ["festival", "monument", "city", "state"] },
+        "itemId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "state": { "type": "string", "maxLength": 100 },
+        "visitedDate": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "userNotes": { "type": "string", "maxLength": 1000 },
+        "rating": { "type": "number" },
+        "photo": { "type": "string", "maxLength": 1024 }
+      },
+      "required": ["id", "itemType", "itemId", "title"]
+    },
+    "QuizHistoryRecord": {
+      "title": "QuizHistoryRecord",
+      "description": "Historical score record from cultural heritage quiz",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "score": { "type": "number" },
+        "totalQuestions": { "type": "number" },
+        "date": { "type": "string", "maxLength": 64 },
+        "topic": { "type": "string", "maxLength": 128 },
+        "accuracy": { "type": "number" }
+      },
+      "required": ["id", "score", "totalQuestions", "date"]
+    },
+    "CommunityReview": {
+      "title": "CommunityReview",
+      "description": "Public community travel tips, photos and reviews",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "userName": { "type": "string", "maxLength": 128 },
+        "userAvatar": { "type": "string", "maxLength": 512 },
+        "itemType": { "type": "string", "enum": ["festival", "monument", "city", "state"] },
+        "itemId": { "type": "string", "maxLength": 128 },
+        "itemTitle": { "type": "string", "maxLength": 200 },
+        "rating": { "type": "number" },
+        "reviewText": { "type": "string", "maxLength": 2000 },
+        "travelTips": { "type": "string", "maxLength": 1000 },
+        "photos": { "type": "array" },
+        "likesCount": { "type": "number" },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "userName", "itemType", "itemId", "rating", "reviewText", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile with preference settings"
+    },
+    "/users/{userId}/bookmarks/{bookmarkId}": {
+      "schema": "UserBookmark",
+      "description": "Bookmarked monuments, festivals and cities"
+    },
+    "/users/{userId}/itineraries/{itineraryId}": {
+      "schema": "SavedItinerary",
+      "description": "Generated and saved trip itineraries"
+    },
+    "/users/{userId}/visitedPlaces/{placeId}": {
+      "schema": "VisitedPlace",
+      "description": "Passport stamps of visited destinations"
+    },
+    "/users/{userId}/quizHistory/{quizId}": {
+      "schema": "QuizHistoryRecord",
+      "description": "Quiz scores and badges earned"
+    },
+    "/communityReviews/{reviewId}": {
+      "schema": "CommunityReview",
+      "description": "Public community travel tips, photos and reviews"
+    }
+  }
+}

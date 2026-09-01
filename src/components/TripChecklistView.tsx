@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { TripChecklistItem } from '../types';
+import { TripChecklistItem, SupportedLanguage } from '../types';
 import { loadSavedChecklist, saveChecklistState } from '../data/checklistData';
+import { getTranslation } from '../data/languages';
 import {
   CheckSquare,
   Square,
@@ -24,11 +25,13 @@ interface TripChecklistViewProps {
   cityId?: string;
   cityName?: string;
   onSelectCity?: (cityId: string) => void;
+  currentLanguage?: SupportedLanguage;
 }
 
 export const TripChecklistView: React.FC<TripChecklistViewProps> = ({
   cityId,
-  cityName
+  cityName,
+  currentLanguage = 'en'
 }) => {
   const [items, setItems] = useState<TripChecklistItem[]>(() => loadSavedChecklist(cityId));
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -78,10 +81,8 @@ export const TripChecklistView: React.FC<TripChecklistViewProps> = ({
   };
 
   const resetAll = () => {
-    if (window.confirm('Reset all checklist items to unchecked?')) {
-      const reset = items.map((i) => ({ ...i, completed: false }));
-      updateItems(reset);
-    }
+    const reset = items.map((i) => ({ ...i, completed: false }));
+    updateItems(reset);
   };
 
   const markAllDone = () => {

@@ -17,6 +17,7 @@ import { STATES_DATA } from './data/statesData';
 import { MONUMENTS_DATA } from './data/monumentsData';
 import { CITIES_DATA } from './data/citiesData';
 import { SUPPORTED_LANGUAGES, getTranslation } from './data/languages';
+import { LanguageProvider, useLanguage } from './context/LanguageContext';
 
 // Components
 import { Navbar } from './components/Navbar';
@@ -39,6 +40,7 @@ import { MonumentInteractiveMap } from './components/MonumentInteractiveMap';
 import { DestinationWeatherView } from './components/DestinationWeatherView';
 import { CultureQuizView } from './components/CultureQuizView';
 import { TripChecklistView } from './components/TripChecklistView';
+import { TourGuideChatbot } from './components/TourGuideChatbot';
 
 import {
   Calendar,
@@ -62,6 +64,7 @@ import { AuthModal } from './components/AuthModal';
 
 function AppMain() {
   const { user, bookmarks, itineraries, toggleBookmark, isBookmarked, saveItinerary } = useAuth();
+  const { currentLanguage, setLanguage, t, formatMonthName } = useLanguage();
 
   // Navigation & View State
   const [currentView, setCurrentView] = useState<AppView>('home');
@@ -71,15 +74,6 @@ function AppMain() {
   const [selectedStateId, setSelectedStateId] = useState<string>('uttar-pradesh');
   const [activeMonthId, setActiveMonthId] = useState<number>(11); // November default for grand festivals
   const [itineraryFestivalId, setItineraryFestivalId] = useState<string | undefined>(undefined);
-
-  // Language Preference State
-  const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>(() => {
-    try {
-      return (localStorage.getItem('virasat_preferred_language') as SupportedLanguage) || 'en';
-    } catch {
-      return 'en';
-    }
-  });
 
   // Navigation History for Back Button
   const [history, setHistory] = useState<
@@ -94,16 +88,7 @@ function AppMain() {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
-  // Set Language Handler
-  const handleSelectLanguage = (lang: SupportedLanguage) => {
-    setCurrentLanguage(lang);
-    try {
-      localStorage.setItem('virasat_preferred_language', lang);
-    } catch (e) {
-      console.warn(e);
-    }
-  };
+  const [isTourGuideOpen, setIsTourGuideOpen] = useState(false);
 
   // Keyboard shortcut for search (⌘K or Ctrl+K)
   useEffect(() => {
@@ -240,55 +225,55 @@ function AppMain() {
     }
   };
 
-  // Breadcrumbs Generator
+  // Breadcrumbs Generator with localization
   const breadcrumbs: BreadcrumbItem[] = useMemo(() => {
-    const items: BreadcrumbItem[] = [{ label: 'Home', view: 'home' }];
+    const items: BreadcrumbItem[] = [{ label: t('nav.home', 'Home'), view: 'home' }];
 
     if (currentView === 'festivals') {
-      items.push({ label: 'Festivals Calendar', view: 'festivals' });
+      items.push({ label: t('nav.festivals', 'Festivals Calendar'), view: 'festivals' });
     } else if (currentView === 'festival-detail') {
-      items.push({ label: 'Festivals', view: 'festivals' });
+      items.push({ label: t('nav.festivals', 'Festivals'), view: 'festivals' });
       const f = FESTIVALS_DATA.find((item) => item.id === selectedFestivalId);
       if (f) items.push({ label: f.name, view: 'festival-detail', params: { festivalId: f.id } });
     } else if (currentView === 'states') {
-      items.push({ label: 'States & Regions', view: 'states' });
+      items.push({ label: t('nav.states', 'States & Regions'), view: 'states' });
     } else if (currentView === 'state-detail') {
-      items.push({ label: 'States', view: 'states' });
+      items.push({ label: t('nav.states', 'States'), view: 'states' });
       const s = STATES_DATA.find((item) => item.id === selectedStateId);
       if (s) items.push({ label: s.name, view: 'state-detail', params: { stateId: s.id } });
     } else if (currentView === 'destinations') {
-      items.push({ label: 'Destinations', view: 'destinations' });
+      items.push({ label: t('nav.destinations', 'Destinations'), view: 'destinations' });
     } else if (currentView === 'city-detail') {
-      items.push({ label: 'Destinations', view: 'destinations' });
+      items.push({ label: t('nav.destinations', 'Destinations'), view: 'destinations' });
       const c = CITIES_DATA.find((item) => item.id === selectedCityId);
       if (c) items.push({ label: c.name, view: 'city-detail', params: { cityId: c.id } });
     } else if (currentView === 'monuments') {
-      items.push({ label: 'Monuments Directory', view: 'monuments' });
+      items.push({ label: t('nav.monuments', 'Monuments Directory'), view: 'monuments' });
     } else if (currentView === 'monuments-map') {
-      items.push({ label: 'Interactive Heritage Map', view: 'monuments-map' });
+      items.push({ label: t('nav.interactiveMap', 'Interactive Heritage Map'), view: 'monuments-map' });
     } else if (currentView === 'culture-quiz') {
-      items.push({ label: 'Heritage Culture Quiz', view: 'culture-quiz' });
+      items.push({ label: t('nav.cultureQuiz', 'Heritage Culture Quiz'), view: 'culture-quiz' });
     } else if (currentView === 'checklist') {
-      items.push({ label: 'Trip & Monument Checklist', view: 'checklist' });
+      items.push({ label: t('nav.tripChecklist', 'Trip & Monument Checklist'), view: 'checklist' });
     } else if (currentView === 'weather') {
-      items.push({ label: 'Destination Weather & Climate', view: 'weather' });
+      items.push({ label: t('nav.weather', 'Destination Weather & Climate'), view: 'weather' });
     } else if (currentView === 'monument-detail') {
-      items.push({ label: 'Monuments', view: 'monuments' });
+      items.push({ label: t('nav.monuments', 'Monuments'), view: 'monuments' });
       const m = MONUMENTS_DATA.find((item) => item.id === selectedMonumentId);
       if (m) items.push({ label: m.name, view: 'monument-detail', params: { monumentId: m.id } });
     } else if (currentView === 'itinerary-generator') {
       const c = CITIES_DATA.find((item) => item.id === selectedCityId);
-      items.push({ label: 'Destinations', view: 'destinations' });
+      items.push({ label: t('nav.destinations', 'Destinations'), view: 'destinations' });
       if (c) items.push({ label: c.name, view: 'city-detail', params: { cityId: c.id } });
-      items.push({ label: 'Plan Itinerary', view: 'itinerary-generator' });
+      items.push({ label: t('nav.planTrip', 'Plan Itinerary'), view: 'itinerary-generator' });
     } else if (currentView === 'my-trip') {
-      items.push({ label: 'My Trip & Saved', view: 'my-trip' });
+      items.push({ label: t('nav.myTrip', 'My Trip & Saved'), view: 'my-trip' });
     } else if (currentView === 'profile') {
-      items.push({ label: 'Traveler Profile', view: 'profile' });
+      items.push({ label: t('nav.profile', 'Traveler Profile'), view: 'profile' });
     }
 
     return items;
-  }, [currentView, selectedFestivalId, selectedCityId, selectedMonumentId, selectedStateId]);
+  }, [currentView, selectedFestivalId, selectedCityId, selectedMonumentId, selectedStateId, currentLanguage, t]);
 
   // Selected Entities
   const currentFestival =
@@ -317,6 +302,7 @@ function AppMain() {
         currentLanguage={currentLanguage}
         onOpenLanguageModal={() => setIsLanguageModalOpen(true)}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onOpenTourGuide={() => setIsTourGuideOpen(true)}
       />
 
       {/* Contextual Breadcrumbs Bar */}
@@ -324,6 +310,7 @@ function AppMain() {
         items={breadcrumbs}
         onNavigate={(v, params) => navigateTo(v, params)}
         onBack={history.length > 1 ? handleBack : undefined}
+        currentLanguage={currentLanguage}
       />
 
       {/* Main Content Area */}
@@ -353,19 +340,20 @@ function AppMain() {
               <MonthSelector
                 selectedMonthId={activeMonthId}
                 onSelectMonth={(mId) => setActiveMonthId(mId)}
+                currentLanguage={currentLanguage}
               />
 
               {/* Month Festivals Grid */}
               <div className="space-y-4 pt-2">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl sm:text-2xl font-serif font-bold text-[#2d2a26]">
-                    Celebrations in {MONTHS_DATA.find((m) => m.id === activeMonthId)?.name}
+                    {t('month.celebrationsIn', 'Celebrations in')} {formatMonthName(activeMonthId)}
                   </h3>
                   <button
                     onClick={() => navigateTo('festivals')}
                     className="text-xs uppercase font-bold tracking-widest text-[#5A5A40] hover:text-[#2d2a26] flex items-center gap-1 cursor-pointer"
                   >
-                    <span>View All 12 Months</span>
+                    <span>{t('month.viewAllMonths', 'View All 12 Months')}</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -379,12 +367,13 @@ function AppMain() {
                         onExplore={(fId) => navigateTo('festival-detail', { festivalId: fId })}
                         isSaved={isBookmarked('festival', festival.id)}
                         onToggleSave={toggleSaveFestival}
+                        currentLanguage={currentLanguage}
                       />
                     ))}
                   </div>
                 ) : (
                   <div className="bg-white rounded-3xl p-8 text-center border border-[#e5e0d8] text-xs text-[#8a817c]">
-                    More regional celebrations being cataloged for this month. Browse through other months or monuments.
+                    {t('festivals.noFestivals', 'More regional celebrations being cataloged for this month. Browse through other months or monuments.')}
                   </div>
                 )}
               </div>
@@ -396,17 +385,17 @@ function AppMain() {
                 <div>
                   <div className="flex items-center gap-1.5 text-xs font-bold text-[#8a817c] uppercase tracking-widest">
                     <Landmark className="w-3.5 h-3.5 text-[#5A5A40]" />
-                    <span>Architectural Wonders</span>
+                    <span>{t('monuments.directorySubtitle', 'Architectural Wonders')}</span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#2d2a26]">
-                    UNESCO Monuments & Ancient Forts
+                    {t('monuments.directoryTitle', 'UNESCO Monuments & Ancient Forts')}
                   </h2>
                 </div>
                 <button
                   onClick={() => navigateTo('monuments')}
                   className="text-xs uppercase font-bold tracking-widest text-[#5A5A40] hover:text-[#2d2a26] flex items-center gap-1 cursor-pointer"
                 >
-                  <span>Explore All Monuments</span>
+                  <span>{t('home.viewAllMonuments', 'Explore All Monuments')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -446,17 +435,17 @@ function AppMain() {
                         </p>
                         <div className="text-[10px] uppercase font-bold tracking-wider text-[#8a817c] flex items-center gap-1.5">
                           <Clock className="w-3.5 h-3.5 text-[#5A5A40]" />
-                          <span>Visit: {monument.estimatedVisitDuration}</span>
+                          <span>{t('monument.visitDuration', 'Visit')}: {monument.estimatedVisitDuration}</span>
                         </div>
                       </div>
                     </div>
 
                     <div className="pt-3 px-1 border-t border-[#e5e0d8] flex items-center justify-between text-xs">
                       <span className="text-[10px] uppercase font-bold tracking-wider text-[#8a817c]">
-                        Entry: {monument.entryFee.indian}
+                        {t('monument.entryFee', 'Entry')}: {monument.entryFee.indian}
                       </span>
                       <span className="text-xs font-bold uppercase tracking-widest text-[#5A5A40] group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                        <span>Details</span>
+                        <span>{t('common.details', 'Details')}</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </span>
                     </div>
@@ -471,17 +460,17 @@ function AppMain() {
                 <div>
                   <div className="flex items-center gap-1.5 text-xs font-bold text-[#8a817c] uppercase tracking-widest">
                     <MapPin className="w-3.5 h-3.5 text-[#5A5A40]" />
-                    <span>Living Cultural Cities</span>
+                    <span>{t('destinations.directorySubtitle', 'Living Cultural Cities')}</span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#2d2a26]">
-                    Explore Iconic Indian Destinations
+                    {t('destinations.directoryTitle', 'Explore Iconic Indian Destinations')}
                   </h2>
                 </div>
                 <button
                   onClick={() => navigateTo('destinations')}
                   className="text-xs uppercase font-bold tracking-widest text-[#5A5A40] hover:text-[#2d2a26] flex items-center gap-1 cursor-pointer"
                 >
-                  <span>All Destinations</span>
+                  <span>{t('home.viewAllDestinations', 'All Destinations')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -521,10 +510,10 @@ function AppMain() {
 
                     <div className="pt-3 px-1 border-t border-[#e5e0d8] flex items-center justify-between text-xs">
                       <span className="text-[10px] uppercase font-bold tracking-wider text-[#8a817c]">
-                        {city.monumentIds.length} Monuments
+                        {city.monumentIds.length} {t('nav.monuments', 'Monuments')}
                       </span>
                       <span className="text-xs font-bold uppercase tracking-widest text-[#5A5A40] group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                        <span>Explore</span>
+                        <span>{t('common.explore', 'Explore')}</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </span>
                     </div>
@@ -538,17 +527,17 @@ function AppMain() {
               <div className="space-y-2 max-w-2xl">
                 <div className="flex items-center gap-2">
                   <span className="bg-[#E6BE8A] text-[#2d2a26] text-[10px] font-bold uppercase tracking-widest px-3 py-0.5 rounded-full">
-                    Advanced Heritage & Cultural Toolkit
+                    {t('home.toolkitBadge', 'Advanced Heritage & Cultural Toolkit')}
                   </span>
                   <span className="text-[#E6BE8A] text-xs font-semibold">
                     Culture Quiz &bull; 11 Languages &bull; Audio Read-Out &bull; Interactive Map
                   </span>
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-serif font-bold text-white leading-snug">
-                  Test Your Heritage Knowledge & Discover Regional Traditions
+                  {t('home.toolkitTitle', 'Test Your Heritage Knowledge & Discover Regional Traditions')}
                 </h3>
                 <p className="text-xs sm:text-sm text-white/80 leading-relaxed font-normal">
-                  Challenge yourself with the Indian Culture & Monument Quiz, practice regional language pronunciation with live speech synthesis, and prepare with curated traveler checklists.
+                  {t('home.toolkitSubtitle', 'Challenge yourself with the Indian Culture & Monument Quiz, practice regional language pronunciation with live speech synthesis, and prepare with curated traveler checklists.')}
                 </p>
               </div>
 
@@ -558,26 +547,26 @@ function AppMain() {
                   className="px-5 py-3 bg-[#E6BE8A] hover:bg-white text-[#2d2a26] rounded-full text-xs uppercase font-bold tracking-wider transition-all cursor-pointer shadow-md flex items-center gap-1.5"
                 >
                   <Award className="w-4 h-4 text-[#5A5A40]" />
-                  <span>Play Culture Quiz</span>
+                  <span>{t('home.toolkitQuiz', 'Play Culture Quiz')}</span>
                 </button>
                 <button
                   onClick={() => setIsLanguageModalOpen(true)}
                   className="px-4 py-3 bg-white/15 hover:bg-white/25 border border-white/20 text-white rounded-full text-xs uppercase font-bold tracking-wider transition-all cursor-pointer backdrop-blur-md flex items-center gap-1.5"
                 >
                   <Languages className="w-4 h-4 text-[#E6BE8A]" />
-                  <span>Language Preferences</span>
+                  <span>{t('home.toolkitLanguages', 'Language Preferences')}</span>
                 </button>
                 <button
                   onClick={() => navigateTo('checklist')}
                   className="px-4 py-3 bg-white/15 hover:bg-white/25 border border-white/20 text-white rounded-full text-xs uppercase font-bold tracking-wider transition-all cursor-pointer backdrop-blur-md flex items-center gap-1.5"
                 >
-                  <span>Trip Checklist</span>
+                  <span>{t('home.toolkitChecklist', 'Trip Checklist')}</span>
                 </button>
                 <button
                   onClick={() => navigateTo('monuments-map')}
                   className="px-4 py-3 bg-white/15 hover:bg-white/25 border border-white/20 text-white rounded-full text-xs uppercase font-bold tracking-wider transition-all cursor-pointer backdrop-blur-md flex items-center gap-1.5"
                 >
-                  <span>Interactive Map</span>
+                  <span>{t('home.toolkitMap', 'Interactive Map')}</span>
                 </button>
               </div>
             </section>
@@ -592,19 +581,20 @@ function AppMain() {
             <div>
               <div className="flex items-center gap-1.5 text-xs font-bold text-[#8a817c] uppercase tracking-widest">
                 <Calendar className="w-3.5 h-3.5 text-[#5A5A40]" />
-                <span>12 Months Calendar</span>
+                <span>{t('festivals.timeline', '12 Months Calendar')}</span>
               </div>
               <h1 className="text-2xl sm:text-4xl font-serif font-bold text-[#2d2a26] mt-0.5">
-                Indian Cultural & Festival Explorer
+                {t('festivals.directoryTitle', 'Indian Cultural & Festival Explorer')}
               </h1>
               <p className="text-xs sm:text-sm text-[#8a817c] mt-1 font-normal">
-                Browse spiritual, classical, folk, and seasonal celebrations across all 12 months.
+                {t('festivals.directorySubtitle', 'Browse spiritual, classical, folk, and seasonal celebrations across all 12 months.')}
               </p>
             </div>
 
             <MonthSelector
               selectedMonthId={activeMonthId}
               onSelectMonth={(mId) => setActiveMonthId(mId)}
+              currentLanguage={currentLanguage}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
@@ -615,6 +605,7 @@ function AppMain() {
                   onExplore={(fId) => navigateTo('festival-detail', { festivalId: fId })}
                   isSaved={isBookmarked('festival', festival.id)}
                   onToggleSave={toggleSaveFestival}
+                  currentLanguage={currentLanguage}
                 />
               ))}
             </div>
@@ -650,13 +641,13 @@ function AppMain() {
             <div>
               <div className="flex items-center gap-1.5 text-xs font-bold text-[#8a817c] uppercase tracking-widest">
                 <Landmark className="w-3.5 h-3.5 text-[#5A5A40]" />
-                <span>Living Architecture</span>
+                <span>{t('monuments.directorySubtitle', 'Living Architecture')}</span>
               </div>
               <h1 className="text-2xl sm:text-4xl font-serif font-bold text-[#2d2a26] mt-0.5">
-                Monuments, Forts & UNESCO Heritage
+                {t('monuments.directoryTitle', 'Monuments, Forts & UNESCO Heritage')}
               </h1>
               <p className="text-xs sm:text-sm text-[#8a817c] mt-1 font-normal">
-                Explore architectural histories, visiting hours, and entry ticket details.
+                {t('monuments.directoryDesc', 'Explore architectural histories, visiting hours, and entry ticket details.')}
               </p>
             </div>
 
@@ -695,17 +686,17 @@ function AppMain() {
                       </p>
                       <div className="text-[10px] uppercase font-bold tracking-wider text-[#8a817c] flex items-center gap-1.5 pt-1">
                         <Clock className="w-3.5 h-3.5 text-[#5A5A40]" />
-                        <span>Visit: {monument.estimatedVisitDuration}</span>
+                        <span>{t('monument.visitDuration', 'Visit')}: {monument.estimatedVisitDuration}</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="pt-3 px-1 border-t border-[#e5e0d8] flex items-center justify-between text-xs">
                     <span className="text-[10px] uppercase font-bold tracking-wider text-[#8a817c]">
-                      Entry: {monument.entryFee.indian}
+                      {t('monument.entryFee', 'Entry')}: {monument.entryFee.indian}
                     </span>
                     <span className="text-xs font-bold uppercase tracking-widest text-[#5A5A40] group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                      <span>View Monument</span>
+                      <span>{t('monument.viewMonument', 'View Monument')}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </span>
                   </div>
@@ -739,13 +730,13 @@ function AppMain() {
             <div>
               <div className="flex items-center gap-1.5 text-xs font-bold text-[#8a817c] uppercase tracking-widest">
                 <MapPin className="w-3.5 h-3.5 text-[#5A5A40]" />
-                <span>Destination Directory</span>
+                <span>{t('destinations.directorySubtitle', 'Destination Directory')}</span>
               </div>
               <h1 className="text-2xl sm:text-4xl font-serif font-bold text-[#2d2a26] mt-0.5">
-                Indian Cultural & Heritage Destinations
+                {t('destinations.directoryTitle', 'Indian Cultural & Heritage Destinations')}
               </h1>
               <p className="text-xs sm:text-sm text-[#8a817c] mt-1 font-normal">
-                Discover monuments, festivals, bazaars, and authentic cuisine across cities.
+                {t('destinations.directoryDesc', 'Discover monuments, festivals, bazaars, and authentic cuisine across cities.')}
               </p>
             </div>
 
@@ -782,11 +773,11 @@ function AppMain() {
 
                       <div className="space-y-1 text-xs text-[#8a817c]">
                         <div>
-                          <strong className="text-[#5A5A40]">Key Sites: </strong>
-                          <span>{city.monumentIds.length} Monuments • {city.religiousSites.length} Temples</span>
+                          <strong className="text-[#5A5A40]">{t('city.keySites', 'Key Sites')}: </strong>
+                          <span>{city.monumentIds.length} {t('nav.monuments', 'Monuments')} • {city.religiousSites.length} {t('city.temples', 'Temples')}</span>
                         </div>
                         <div>
-                          <strong className="text-[#5A5A40]">Must Eat: </strong>
+                          <strong className="text-[#5A5A40]">{t('city.mustEat', 'Must Eat')}: </strong>
                           <span>{city.authenticFood.slice(0, 2).map((f) => f.name).join(', ')}</span>
                         </div>
                       </div>
@@ -795,7 +786,7 @@ function AppMain() {
 
                   <div className="pt-3 px-1 border-t border-[#e5e0d8] flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-widest text-[#5A5A40]">
-                      Explore Heritage Guide
+                      {t('city.exploreGuide', 'Explore Heritage Guide')}
                     </span>
                     <ArrowRight className="w-4 h-4 text-[#5A5A40] group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -833,12 +824,14 @@ function AppMain() {
               navigateTo('state-detail', { stateId: sId });
             }}
             onSelectCity={(cId) => navigateTo('city-detail', { cityId: cId })}
+            currentLanguage={currentLanguage}
           />
         )}
 
         {currentView === 'state-detail' && currentState && (
           <StateDetailView
             state={currentState}
+            currentLanguage={currentLanguage}
             onSelectCity={(cId) => navigateTo('city-detail', { cityId: cId })}
             onSelectFestival={(fId) => navigateTo('festival-detail', { festivalId: fId })}
             onSelectMonument={(mId) => navigateTo('monument-detail', { monumentId: mId })}
@@ -865,6 +858,7 @@ function AppMain() {
             }}
             onSaveItinerary={(saved) => saveItinerary(saved)}
             onBack={handleBack}
+            currentLanguage={currentLanguage}
           />
         )}
 
@@ -884,6 +878,7 @@ function AppMain() {
               navigateTo('itinerary-generator', { cityId: cId, festivalId: fId });
             }}
             onOpenAuthModal={() => setIsAuthModalOpen(true)}
+            currentLanguage={currentLanguage}
           />
         )}
 
@@ -897,6 +892,7 @@ function AppMain() {
               onSelectMonument={(mId) => navigateTo('monument-detail', { monumentId: mId })}
               onOpenItineraryGenerator={(cId) => navigateTo('itinerary-generator', { cityId: cId })}
               heightClassName="h-[640px]"
+              currentLanguage={currentLanguage}
             />
           </div>
         )}
@@ -908,6 +904,7 @@ function AppMain() {
           <DestinationWeatherView
             onSelectCity={(cId) => navigateTo('city-detail', { cityId: cId })}
             onExploreMap={() => navigateTo('monuments-map')}
+            currentLanguage={currentLanguage}
           />
         )}
 
@@ -931,6 +928,7 @@ function AppMain() {
             <TripChecklistView
               cityName={userLocation.city}
               onSelectCity={(cId) => navigateTo('city-detail', { cityId: cId })}
+              currentLanguage={currentLanguage}
             />
           </div>
         )}
@@ -965,35 +963,35 @@ function AppMain() {
                 </span>
               </div>
               <p className="text-xs text-neutral-300 leading-relaxed max-w-md font-normal">
-                An Indian cultural, festival, and heritage discovery platform. Exploring festivals, monuments, living rituals, classical arts, authentic cuisine, and custom travel journeys across India.
+                {t('footer.description', 'An Indian cultural, festival, and heritage discovery platform. Exploring festivals, monuments, living rituals, classical arts, authentic cuisine, and custom travel journeys across India.')}
               </p>
               <div className="flex items-center gap-2 text-xs text-[#E6BE8A]">
                 <MapPin className="w-3.5 h-3.5 text-orange-400" />
-                <span>Current Departure Origin: <strong className="text-white">{userLocation.city}, {userLocation.state}</strong></span>
+                <span>{t('footer.departureOrigin', 'Current Departure Origin')}: <strong className="text-white">{userLocation.city}, {userLocation.state}</strong></span>
               </div>
             </div>
 
             <div className="space-y-2">
               <h4 className="text-xs font-bold uppercase tracking-widest text-[#E6BE8A]">
-                Quick Navigation
+                {t('footer.quickNav', 'Quick Navigation')}
               </h4>
               <div className="flex flex-col space-y-2 text-xs text-neutral-300">
-                <button onClick={() => navigateTo('home')} className="hover:text-white text-left cursor-pointer transition-colors">Home</button>
-                <button onClick={() => navigateTo('culture-quiz')} className="hover:text-white text-left cursor-pointer transition-colors">Heritage Culture Quiz</button>
-                <button onClick={() => setIsLanguageModalOpen(true)} className="hover:text-white text-left cursor-pointer transition-colors">Language Preferences (11 Languages)</button>
-                <button onClick={() => navigateTo('checklist')} className="hover:text-white text-left cursor-pointer transition-colors">Trip & Monument Checklist</button>
-                <button onClick={() => navigateTo('monuments-map')} className="hover:text-white text-left cursor-pointer transition-colors">Interactive Heritage Map</button>
-                <button onClick={() => navigateTo('weather')} className="hover:text-white text-left cursor-pointer transition-colors">Destination Weather & Climate</button>
-                <button onClick={() => navigateTo('festivals')} className="hover:text-white text-left cursor-pointer transition-colors">12 Months Festivals</button>
-                <button onClick={() => navigateTo('monuments')} className="hover:text-white text-left cursor-pointer transition-colors">UNESCO Monuments</button>
-                <button onClick={() => navigateTo('destinations')} className="hover:text-white text-left cursor-pointer transition-colors">Heritage Destinations</button>
-                <button onClick={() => navigateTo('my-trip')} className="hover:text-white text-left cursor-pointer transition-colors">My Saved Itineraries</button>
+                <button onClick={() => navigateTo('home')} className="hover:text-white text-left cursor-pointer transition-colors">{t('nav.home', 'Home')}</button>
+                <button onClick={() => navigateTo('culture-quiz')} className="hover:text-white text-left cursor-pointer transition-colors">{t('nav.cultureQuiz', 'Heritage Culture Quiz')}</button>
+                <button onClick={() => setIsLanguageModalOpen(true)} className="hover:text-white text-left cursor-pointer transition-colors">{t('home.toolkitLanguages', 'Language Preferences')}</button>
+                <button onClick={() => navigateTo('checklist')} className="hover:text-white text-left cursor-pointer transition-colors">{t('nav.tripChecklist', 'Trip & Monument Checklist')}</button>
+                <button onClick={() => navigateTo('monuments-map')} className="hover:text-white text-left cursor-pointer transition-colors">{t('nav.interactiveMap', 'Interactive Heritage Map')}</button>
+                <button onClick={() => navigateTo('weather')} className="hover:text-white text-left cursor-pointer transition-colors">{t('nav.weather', 'Destination Weather & Climate')}</button>
+                <button onClick={() => navigateTo('festivals')} className="hover:text-white text-left cursor-pointer transition-colors">{t('nav.festivals', '12 Months Festivals')}</button>
+                <button onClick={() => navigateTo('monuments')} className="hover:text-white text-left cursor-pointer transition-colors">{t('nav.monuments', 'UNESCO Monuments')}</button>
+                <button onClick={() => navigateTo('destinations')} className="hover:text-white text-left cursor-pointer transition-colors">{t('nav.destinations', 'Heritage Destinations')}</button>
+                <button onClick={() => navigateTo('my-trip')} className="hover:text-white text-left cursor-pointer transition-colors">{t('nav.myTrip', 'My Saved Itineraries')}</button>
               </div>
             </div>
 
             <div className="space-y-2">
               <h4 className="text-xs font-bold uppercase tracking-widest text-[#E6BE8A]">
-                Official Booking Partners
+                {t('footer.officialPartners', 'Official Booking Partners')}
               </h4>
               <div className="flex flex-col space-y-2 text-xs text-neutral-300">
                 <a href="https://asi.nic.in" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Archaeological Survey of India (ASI)</a>
@@ -1007,7 +1005,7 @@ function AppMain() {
 
           <div className="pt-6 border-t border-white/15 flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] uppercase tracking-wider text-neutral-400">
             <span>© {new Date().getFullYear()} Virasat & Heritage Discovery. Incredible India.</span>
-            <span>Crafted with authentic Indian cultural, monument, and culinary datasets.</span>
+            <span>{t('footer.crafted', 'Crafted with authentic Indian cultural, monument, and culinary datasets.')}</span>
           </div>
         </div>
       </footer>
@@ -1024,7 +1022,7 @@ function AppMain() {
         isOpen={isLanguageModalOpen}
         onClose={() => setIsLanguageModalOpen(false)}
         currentLanguage={currentLanguage}
-        onSelectLanguage={handleSelectLanguage}
+        onSelectLanguage={setLanguage}
       />
 
       <GlobalSearchModal
@@ -1040,14 +1038,30 @@ function AppMain() {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
       />
+
+      {/* AI Tour Guide & Cultural Companion Floating Assistant */}
+      <TourGuideChatbot
+        currentLanguage={currentLanguage}
+        activeCityName={currentCity?.name}
+        activeMonumentName={currentMonument?.name}
+        activeFestivalName={currentFestival?.name}
+        activeStateName={currentState?.name}
+        userCity={userLocation.city}
+        currentView={currentView}
+        onNavigateTo={(view, params) => navigateTo(view, params)}
+        isOpenExternal={isTourGuideOpen}
+        onToggleExternal={() => setIsTourGuideOpen(!isTourGuideOpen)}
+      />
     </div>
   );
 }
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppMain />
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <AppMain />
+      </AuthProvider>
+    </LanguageProvider>
   );
 }

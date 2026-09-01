@@ -1,14 +1,21 @@
 import React from 'react';
-import { BreadcrumbItem } from '../types';
+import { BreadcrumbItem, SupportedLanguage } from '../types';
+import { getTranslation } from '../data/languages';
 import { ChevronRight, ArrowLeft, Home } from 'lucide-react';
 
 interface BreadcrumbsProps {
   items: BreadcrumbItem[];
   onNavigate: (view: BreadcrumbItem['view'], params?: BreadcrumbItem['params']) => void;
   onBack?: () => void;
+  currentLanguage?: SupportedLanguage;
 }
 
-export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, onNavigate, onBack }) => {
+export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
+  items,
+  onNavigate,
+  onBack,
+  currentLanguage = 'en'
+}) => {
   if (items.length <= 1) return null;
 
   return (
@@ -23,7 +30,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, onNavigate, onB
                   <button
                     onClick={() => onNavigate(item.view, item.params)}
                     className="flex items-center gap-1 text-[#8a817c] hover:text-[#5A5A40] font-semibold uppercase tracking-wider text-[10px] transition-colors whitespace-nowrap cursor-pointer"
-                    title="Home"
+                    title={getTranslation('nav.home', currentLanguage) || 'Home'}
                   >
                     <Home className="w-3.5 h-3.5 text-[#5A5A40]" />
                     <span>{item.label}</span>
@@ -52,7 +59,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, onNavigate, onB
             className="flex items-center gap-1.5 px-3 py-1 text-[10px] uppercase font-bold tracking-widest text-[#5A5A40] bg-white hover:bg-[#f5f2ed] border border-[#e5e0d8] rounded-full transition-all shrink-0 cursor-pointer shadow-2xs hover:shadow-xs active:scale-95"
           >
             <ArrowLeft className="w-3 h-3" />
-            <span>Back</span>
+            <span>{getTranslation('common.back', currentLanguage) || 'Back'}</span>
           </button>
         )}
       </div>
