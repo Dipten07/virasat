@@ -1,0 +1,10 @@
+{
+  "name": "Virasat",
+  "description": "Premium Indian cultural, festival, and heritage travel discovery app with personalized itineraries, monument guides, multilingual language preferences, and interactive culture quiz.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
